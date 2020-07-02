@@ -4,36 +4,45 @@
 *    2.7 - Loading external data
 */
 
-d3.tsv("data/ages.tsv").then(function(data){
+d3.json("./data/buildings.json").then((data) => {
     data.forEach(function(d){
-        d.age = +d.age;
+        d.height = +d.height;
     });
 
     var svg = d3.select("#chart-area").append("svg")
         .attr("width", 400)
         .attr("height", 400);
 
-    var circles = svg.selectAll("circle")
-        .data(data);
+    var x = d3.scaleBand()
+        .domain(['Burj Khalifa', 'Shangai Tower',
+            'Abraj Al-Bait Clock Tower', 'Ping An Finance Center',
+            'Lotte World Tower'])
+        .range([0, 400])
+        .paddingInner(0.3)
+        .paddingOuter(0.3)
 
-    circles.enter()
-        .append("circle")
-            .attr("cx", function(d, i){
-                console.log(d);
-                return (i * 50) + 25;
-            })
-            .attr("cy", 25)
-            .attr("r", function(d){
-                return d.age * 2;
-            })
-            .attr("fill", function(d){
-                if (d.name == "Tony") {
-                    return "blue";
-                }
-                else {
-                    return "red";
-                }
-            });
-}).catch(function(error){
-    console.log(error);
-})
+    var y = d3.scaleLinear()
+        .domain([0, 828])
+        .range([0, 400])
+
+    var circles = svg.selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", function(d){
+            return x(d.name);
+        })
+        .attr("y", 20)
+        .attr("width", x.bandwidth)
+        .attr("height", function(d){
+            return d.height;
+        })
+        .attr("fill", (d) => {
+            if(d.name === 'Lotte') {
+                return "grey"
+            } 
+            else {
+                return "blue"
+            }
+        });
+}).catch(err => console.log(err))
